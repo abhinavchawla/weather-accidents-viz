@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualization lab2</title>
+    <style>
+        h1 {
+            color: #0099FF;
+        }
+
+        p {
+            color: #000000;
+        }
+
+        tr {
+            background-color: #FF8448;
+
+        }
+
+        td {
+            background-color: #0099FF;
+
+        }
+
+        table {
+            color: #FFFFFF;
+        }
+
+        svg {
+            font: 10px sans-serif;
+        }
+
+        .background path {
+            fill: none;
+            stroke: #ddd;
+            shape-rendering: crispEdges;
+        }
+
+        .foreground path {
+            fill: none;
+            stroke: steelblue;
+        }
+
+        .brush .extent {
+            fill-opacity: .3;
+            stroke: #fff;
+            shape-rendering: crispEdges;
+        }
+
+        .axis line,
+        .axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+            cursor: move;
+        }
+
+        .axis .axis-label {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Legend Font Style */
+        body {
+            font: 11px sans-serif;
+            background-color: #ffffff;
+        }
+
+
+        .axis text {
+            font: 10px sans-serif;
+        }
+
+        .axis line, .axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+    </style>
+</head>
+<body>
+<div class="header" style="background-color: antiquewhite; padding: 20px;
+ display: inline-block;
+ width: 100%;
+ height: 100%;
+ text-align: center;
+ color: rgb(148, 1, 1);">
+    <div id="child" class="child">
+        <h1>WEATHER-ACCIDENT STATS</h1>
+    </div>
+</div>
+<div id="svgContainer" class="svgContainer" style="background-color:lightgray;">
+    <div>
+        <!-- <input type="radio" id="states" name="myradio" value="states">
+         <label for="myradio">STATES</label>
+         <input type="radio" id="county" name="myradio" value="county">
+         <label for="myradio">COUNTY</label><br> -->
+        <button class="submit" onclick="handleSubmit()">Refresh</button>
+        <svg id="mysvg1" width="900" height="500"></svg>
+    </div>
+    <div>
+        <svg id="mysvg2" width="900" height="500"></svg>
+        <svg id="mysvg3" width="900" height="500"></svg>
+        <svg id="mysvg4" width="900" height="500"></svg>
+        <svg id="mysvg5" width="900" height="500"></svg>
+    </div>
+</div>
+<div id="pcp"></div>
+</div>
+</div>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://bl.ocks.org/syntagmatic/raw/3341641/render-queue.js"></script>
+
+<script>
+
+    fetch('/bar')
+        .then(function (response) {
+            return response.json()
+        }).then(function (text) {
+        const createChartBar = (myData) => {
+            var svg = d3.select("#mysvg1"),
+                margin = 200,
+                width = svg.attr("width") - margin,
+                height = svg.attr("height") - margin;
+
+            // svg.append("rect")
+            // .attr("width", "100%")
+            // .attr("height", "100%")
+            // .attr("fill", "aliceblue");
+            svg
+                .append("text")
+                .attr("transform", "translate(100,0)")
+                .attr("x", 200)
+                .attr("y", 50)
+                .attr("font-size", "24px")
+                .text("BAR CHART:" + "STATES");
+
+            var xScale = d3.scaleBand().range([0, width]).padding(0.4);
+            yScale = d3.scaleLinear().range([height, 0]);
+
+            var g = svg
+                .append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+            xScale.domain(
+                myData.map(function (d) {
+                        return d.key;
+                    }
+                )
+            );
+            yScale.domain([
+                0,
+                d3.max(myData, function (d) {
+                        return +d.value;
+                    }
+                )
+            ]);
+
+            g.append("g")
+                //.attr("transform", "translate(0," + height + ")") 
+                .call(d3.axisBottom(xScale))
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                //.call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-65)");
+
+            g.append("g")
+                .append("text")
+                .attr("y", height + 80)
+                .attr("x", width - 100)
+                .attr("text-anchor", "end")
+                .attr("stroke", "black")
+                .text("STATES")
+
+            g.append("g")
+                .call(
+                    d3
+                        .axisLeft(yScale)
+                        .tickFormat(function (d) {
+                            return d;
+                        })
+                        .ticks(10)
+                )
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", "-5.1em")
+                .attr("text-anchor", "end")
+                .attr("stroke", "black")
+                .text("FREQUENCY");
+
+            g.selectAll(".bar")
+                .data(myData)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .on("mouseover", onMouseOver)
+                .on("mouseout", onMouseOut)
+                .on("click", onMouseClick)
+                .attr("x", function (d) {
+                    return xScale(d.key);
+                })
+                .attr("y", function (d) {
+                    return yScale(+d.value);
+                })
+                .attr("width", xScale.bandwidth())
+                .attr("height", function (d) {
+                    return height - yScale(+d.value);
+                });
+
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr('width', xScale.bandwidth() + 5)
+                    .attr("y", function () {
+                        return yScale(+d.value) - 10;
+                    })
+                    .attr("height", function () {
+                        return height - yScale(+d.value) + 10;
+                    });
+
+                g.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        //console.log(xScale(d.key));
+                        return xScale(d.key);
+                    })
+                    .attr('y', function () {
+                        return yScale(+d.value) - 20;
+                    })
+                    .text(function () {
+                        return [+d.value];
+                    });
+            }
+
+            function onMouseOut(d, i) {
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr('width', xScale.bandwidth())
+                    .attr("y", function () {
+                        return yScale(+d.value);
+                    })
+                    .attr("height", function () {
+                        return height - yScale(+d.value);
+                    });
+
+                d3.selectAll('.val')
+                    .remove()
+            }
+
+            function onMouseClick(d, i) {
+                fetch('/county/' + d.key)
+                    .then(function (response) {
+                        return response.json()
+                    }).then(function (data) {
+                    const createCountyBar = (myData) => {
+                        var svg = d3.select("#mysvg1"),
+                            margin = 200,
+                            width = svg.attr("width") - margin,
+                            height = svg.attr("height") - margin;
+
+                        // svg.append("rect")
+                        // .attr("width", "100%")
+                        // .attr("height", "100%")
+                        // .attr("fill", "aliceblue");
+                        svg
+                            .append("text")
+                            .attr("transform", "translate(100,0)")
+                            .attr("x", 200)
+                            .attr("y", 50)
+                            .attr("font-size", "24px")
+                            .text("BAR CHART:" + "COUNTIES");
+
+                        var xScale = d3.scaleBand().range([0, width]).padding(0.4);
+                        yScale = d3.scaleLinear().range([height, 0]);
+
+                        var g = svg
+                            .append("g")
+                            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+                        xScale.domain(
+                            myData.map(function (d) {
+                                    return d.key;
+                                }
+                            )
+                        );
+                        yScale.domain([
+                            0,
+                            d3.max(myData, function (d) {
+                                    return +d.value;
+                                }
+                            )
+                        ]);
+
+                        g.append("g")
+                            //.attr("transform", "translate(0," + height + ")") 
+                            .call(d3.axisBottom(xScale))
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(0," + height + ")")
+                            //.call(d3.axisBottom(xScale))
+                            .selectAll("text")
+                            .style("text-anchor", "end")
+                            .attr("dx", "-.8em")
+                            .attr("dy", ".15em")
+                            .attr("transform", "rotate(-65)");
+
+                        g.append("g")
+                            .append("text")
+                            .attr("y", height + 80)
+                            .attr("x", width - 100)
+                            .attr("text-anchor", "end")
+                            .attr("stroke", "black")
+                            .text("COUNTIES")
+
+                        g.append("g")
+                            .call(
+                                d3
+                                    .axisLeft(yScale)
+                                    .tickFormat(function (d) {
+                                        return d;
+                                    })
+                                    .ticks(10)
+                            )
+                            .append("text")
+                            .attr("transform", "rotate(-90)")
+                            .attr("y", 6)
+                            .attr("dy", "-5.1em")
+                            .attr("text-anchor", "end")
+                            .attr("stroke", "black")
+                            .text("FREQUENCY");
+
+                        g.selectAll(".bar")
+                            .data(myData)
+                            .enter()
+                            .append("rect")
+                            .attr("class", "bar")
+                            .on("mouseover", onMouseOver)
+                            .on("mouseout", onMouseOut)
+                            .on("click", onMouseClick)
+                            .attr("x", function (d) {
+                                return xScale(d.key);
+                            })
+                            .attr("y", function (d) {
+                                return yScale(+d.value);
+                            })
+                            .attr("width", xScale.bandwidth())
+                            .attr("height", function (d) {
+                                return height - yScale(+d.value);
+                            });
+
+                        function onMouseOver(d, i) {
+                            d3.select(this).attr('class', 'highlight');
+                            d3.select(this)
+                                .transition()
+                                .duration(200)
+                                .attr('width', xScale.bandwidth() + 5)
+                                .attr("y", function () {
+                                    return yScale(+d.value) - 10;
+                                })
+                                .attr("height", function () {
+                                    return height - yScale(+d.value) + 10;
+                                });
+
+                            g.append("text")
+                                .attr('class', 'val')
+                                .attr('x', function () {
+                                    //console.log(xScale(d.key));
+                                    return xScale(d.key);
+                                })
+                                .attr('y', function () {
+                                    return yScale(+d.value) - 20;
+                                })
+                                .text(function () {
+                                    return [+d.value];
+                                });
+                        }
+
+                        function onMouseClick(d, i) {
+                            document.getElementById("mysvg1").innerHTML = '';
+                            createChartBar(text)
+                        }
+
+                    };
+                    document.getElementById("mysvg1").innerHTML = '';
+                    createCountyBar(data)
+                });
+            }
+        };
+        console.log(text)
+        document.getElementById("mysvg1").innerHTML = '';
+        createChartBar(text)
+
+    });
+
+    fetch('/bar_state_year')
+        .then(function (response) {
+            return response.json()
+        }).then(function (year_data) {
+        fetch('/bar_state_month')
+            .then(function (response) {
+                return response.json()
+            }).then(function (month_data) {
+            fetch('/bar_state_day')
+                .then(function (response) {
+                    return response.json()
+                }).then(function (day_data) {
+                fetch('/bar_state_hour')
+                    .then(function (response) {
+                        return response.json()
+                    }).then(function (hour_data) {
+                    const createTimeChartBar = (id, timeData, Name) => {
+                        var svg = d3.select(id),
+                            margin = 200,
+                            width = svg.attr("width") - margin,
+                            height = svg.attr("height") - margin;
+
+                        // svg.append("rect")
+                        // .attr("width", "100%")
+                        // .attr("height", "100%")
+                        // .attr("fill", "aliceblue");
+                        svg
+                            .append("text")
+                            .attr("transform", "translate(100,0)")
+                            .attr("x", 200)
+                            .attr("y", 50)
+                            .attr("font-size", "24px")
+                            .text("BAR CHART:" + Name);
+
+                        var xScale = d3.scaleBand().range([0, width]).padding(0.4);
+                        yScale = d3.scaleLinear().range([height, 0]);
+
+                        var g = svg
+                            .append("g")
+                            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+                        xScale.domain(
+                            timeData.map(function (d) {
+                                    return d.key;
+                                }
+                            )
+                        );
+                        yScale.domain([
+                            0,
+                            d3.max(timeData, function (d) {
+                                    return +d.value;
+                                }
+                            )
+                        ]);
+
+                        g.append("g")
+                            //.attr("transform", "translate(0," + height + ")") 
+                            .call(d3.axisBottom(xScale))
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(0," + height + ")")
+                            //.call(d3.axisBottom(xScale))
+                            .selectAll("text")
+                            .style("text-anchor", "end")
+                            .attr("dx", "-.8em")
+                            .attr("dy", ".15em")
+                            .attr("transform", "rotate(-65)");
+
+                        g.append("g")
+                            .append("text")
+                            .attr("y", height + 80)
+                            .attr("x", width - 100)
+                            .attr("text-anchor", "end")
+                            .attr("stroke", "black")
+                            .text(Name)
+
+                        g.append("g")
+                            .call(
+                                d3
+                                    .axisLeft(yScale)
+                                    .tickFormat(function (d) {
+                                        return d;
+                                    })
+                                    .ticks(10)
+                            )
+                            .append("text")
+                            .attr("transform", "rotate(-90)")
+                            .attr("y", 6)
+                            .attr("dy", "-5.1em")
+                            .attr("text-anchor", "end")
+                            .attr("stroke", "black")
+                            .text("FREQUENCY");
+
+                        g.selectAll(".bar")
+                            .data(timeData)
+                            .enter()
+                            .append("rect")
+                            .attr("class", "bar")
+                            .on("mouseover", onMouseOver)
+                            .on("mouseout", onMouseOut)
+                            .attr("x", function (d) {
+                                return xScale(d.key);
+                            })
+                            .attr("y", function (d) {
+                                return yScale(+d.value);
+                            })
+                            .attr("width", xScale.bandwidth())
+                            .attr("height", function (d) {
+                                return height - yScale(+d.value);
+                            });
+
+                        function onMouseOver(d, i) {
+                            d3.select(this).attr('class', 'highlight');
+                            d3.select(this)
+                                .transition()
+                                .duration(200)
+                                .attr('width', xScale.bandwidth() + 5)
+                                .attr("y", function () {
+                                    return yScale(+d.value) - 10;
+                                })
+                                .attr("height", function () {
+                                    return height - yScale(+d.value) + 10;
+                                });
+
+                            g.append("text")
+                                .attr('class', 'val')
+                                .attr('x', function () {
+                                    return xScale(d.key);
+                                })
+                                .attr('y', function () {
+                                    return yScale(+d.value) - 20;
+                                })
+                                .text(function () {
+                                    return [+d.value];
+                                });
+                        }
+
+                        function onMouseOut(d, i) {
+                            d3.select(this).attr('class', 'bar');
+                            d3.select(this)
+                                .transition()
+                                .duration(200)
+                                .attr('width', xScale.bandwidth())
+                                .attr("y", function () {
+                                    return yScale(+d.value);
+                                })
+                                .attr("height", function () {
+                                    return height - yScale(+d.value);
+                                });
+
+                            d3.selectAll('.val')
+                                .remove()
+                        }
+                    };
+                    console.log(year_data)
+                    console.log(month_data)
+                    console.log(day_data)
+                    console.log(hour_data)
+                    document.getElementById("mysvg2").innerHTML = '';
+                    createTimeChartBar("#mysvg2", year_data, "YEAR")
+                    document.getElementById("mysvg3").innerHTML = '';
+                    createTimeChartBar("#mysvg3", month_data, "MONTH")
+                    document.getElementById("mysvg4").innerHTML = '';
+                    createTimeChartBar("#mysvg4", day_data, "DAY OF WEEK")
+                    document.getElementById("mysvg5").innerHTML = '';
+                    createTimeChartBar("#mysvg5", hour_data, "HOURS")
+                });
+            });
+        });
+    });
+
+    fetch('/pcp')
+        .then(function (response) {
+            return response.json()
+        }).then(function (text) {
+
+        const createPCP = (data) => {
+            var margin = {top: 50, right: 50, bottom: 50, left: 50},
+                width = 1900 - margin.left - margin.right,
+                height = 600 - margin.top - margin.bottom;
+
+            var color = d3.scaleOrdinal()
+                .range(["#5DA5B3", "#D58323", "#DD6CA7", "#54AF52", "#8C92E8", "#E15E5A", "#725D82", "#776327", "#50AB84", "#954D56", "#AB9C27", "#517C3F", "#9D5130", "#357468", "#5E9ACF", "#C47DCB", "#7D9E33", "#DB7F85", "#BA89AD", "#4C6C86", "#B59248", "#D8597D", "#944F7E", "#D67D4B", "#8F86C2"]);
+
+
+            var dimensions = [
+                {
+                    name: "Severity",
+                    scale: d3.scalePoint().range([height, 0]),
+                    type: "string"
+                },
+                {
+                    name: "Temperature(F)",
+                    scale: d3.scaleLinear().range([height, 0]),
+                    type: "number"
+                },
+                {
+                    name: "Humidity(%)",
+                    scale: d3.scaleLinear().range([height, 0]),
+                    type: "number"
+                },
+                {
+                    name: "Visibility(mi)",
+                    scale: d3.scaleLinear().range([height, 0]),
+                    type: "number"
+                },
+                {
+                    name: "Weather_Condition",
+                    scale: d3.scalePoint().range([0, height]),
+                    type: "string"
+                },
+                {
+                    name: "Sunrise_Sunset",
+                    scale: d3.scalePoint().range([0, height]),
+                    type: "string"
+                },
+                {
+                    name: "Traffic_Signal",
+                    scale: d3.scalePoint().range([0, height]),
+                    type: "string"
+                },
+                {
+                    name: "Junction",
+                    scale: d3.scalePoint().range([0, height]),
+                    type: "string"
+                },
+                {
+                    name: "Wind_Speed(mph)",
+                    scale: d3.scaleLinear().range([height, 0]),
+                    type: "number"
+                }
+            ];
+
+            var x = d3.scalePoint().domain(dimensions.map(function (d) {
+                    return d.name;
+                })).range([0, width]),
+                y = {},
+                dragging = {};
+
+            for (i in dimensions) {
+                var name = dimensions[i].name
+                y[name] = d3.scaleLinear()
+                    .domain(d3.extent(data, function (d) {
+                        return +d[name];
+                    }))
+                    .range([height, 0])
+            }
+
+            var line = d3.line(),
+                axis = d3.axisLeft(),
+                background,
+                foreground;
+
+            var svg = d3.select("#pcp").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            dimensions.forEach(function (dimension) {
+                dimension.scale.domain(dimension.type === "number"
+                    ? d3.extent(data, function (d) {
+                        return +d[dimension.name];
+                    })
+                    : data.map(function (d) {
+                        return d[dimension.name];
+                    }).sort());
+            });
+
+            background = svg.append("g")
+                .attr("class", "background")
+                .selectAll("path")
+                .data(data)
+                .enter().append("path")
+                .attr("d", path);
+
+            foreground = svg.append("g")
+                .attr("class", "foreground")
+                .selectAll("path")
+                .data(data)
+                .enter().append("path")
+                .attr("class", function (d) {
+                    return "line " + d.Severity
+                })
+                .attr("d", path)
+                .style("stroke", function (d) {
+                    return (color(d.Severity))
+                })
+                .style("stroke-width", 1)
+                .style("opacity", 0.5);
+
+            var g = svg.selectAll(".dimension")
+                .data(dimensions)
+                .enter().append("g")
+                .attr("class", "dimension")
+                .attr("transform", function (d) {
+                    return "translate(" + x(d.name) + ")";
+                })
+                .call(d3.drag()
+                    .subject(subject)
+                    .on("start", function (d) {
+                        dragging[d.name] = x(d.name);
+                        background.attr("visibility", "hidden");
+                    })
+                    .on("drag", function (d) {
+                        dragging[d.name] = Math.min(width, Math.max(0, d3.event.x));
+                        foreground.attr("d", path);
+                        dimensions.sort(function (a, b) {
+                            return position(a) - position(b);
+                        });
+                        x.domain(dimensions.map(function (d) {
+                            return d.name;
+                        }));
+                        g.attr("transform", function (d) {
+                            return "translate(" + position(d) + ")";
+                        })
+                    })
+                    .on("end", function (d) {
+                        delete dragging[d.name];
+                        transition(d3.select(this)).attr("transform", "translate(" + x(d.name) + ")");
+                        transition(foreground).attr("d", path);
+                        background
+                            .attr("d", path)
+                            .transition()
+                            .delay(500)
+                            .duration(0)
+                            .attr("visibility", null);
+                    })
+                );
+
+            function subject(d) {
+                return {x: x(d.name)};
+            }
+
+            g.append("g")
+                .attr("class", "axis")
+                .each(function (d) {
+                    d3.select(this).call(d3.axisLeft(d.scale));
+                })
+                .append("text")
+                .style("text-anchor", "middle")
+                .attr("y", -9)
+                .text(function (d) {
+                    return d.name;
+                })
+                .style("fill", "black")
+                .attr("class", "axis");
+
+            g.append("g")
+                .attr("class", "brush")
+                .each(function (d) {
+                    d3.select(this).call(
+                        y[d.name].brush = d3.brushY()
+                            .extent([[-10, 0], [10, height]])
+                            .on("start", brushstart)
+                            .on("brush", brush)
+                            .on("end", brush)
+                    )
+                })
+                .selectAll("rect")
+                .attr("x", -8)
+                .attr("width", 16);
+
+
+            function position(d) {
+                var v = dragging[d.name];
+                return v == null ? x(d.name) : v;
+            }
+
+            function transition(g) {
+                return g.transition().duration(500);
+            }
+
+            function path(d) {
+                return line(dimensions.map(function (dimension) {
+                    var v = dragging[dimension.name];
+                    var tx = v == null ? x(dimension.name) : v;
+                    return [tx, dimension.scale(d[dimension.name])];
+                }));
+            }
+
+            function brushstart() {
+                d3.event.sourceEvent.stopPropagation();
+            }
+
+            function brush() {
+                var actives = [];
+                svg.selectAll(".brush")
+                    .filter(function (d) {
+                        return d3.brushSelection(this);
+                    })
+                    .each(function (key) {
+                        actives.push({
+                            dimension: key.name,
+                            extent: d3.brushSelection(this)
+                        });
+                    });
+                if (actives.length === 0) {
+                    foreground.style("display", null);
+                } else {
+                    foreground.style("display", function (d) {
+                        return actives.every(function (brushObj) {
+                            return brushObj.extent[0] <= y[brushObj.dimension](d[brushObj.dimension]) && y[brushObj.dimension](d[brushObj.dimension]) <= brushObj.extent[1];
+                        }) ? null : "none";
+                    });
+                }
+
+            }
+        };
+        createPCP(text);
+    });
+    fetch('/chloropleth')
+        .then(function (response) {
+            return response.json()
+        }).then(function (data) {
+//Width and height of map
+        var width = 960;
+        var height = 500;
+
+        var lowColor = '#ffffed'
+        var highColor = '#8b0000'
+
+// D3 Projection
+        var projection = d3.geoAlbersUsa()
+            .translate([width / 2, height / 2]) // translate to center of screen
+            .scale([1000]); // scale things down so see entire US
+
+// Define path generator
+        var path = d3.geoPath() // path generator that will convert GeoJSON to SVG paths
+            .projection(projection); // tell path generator to use albersUsa projection
+
+//Create SVG element and append map to the SVG
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+// Load in my states data!
+        var dataArray = [];
+        for (var d = 0; d < data.length; d++) {
+            console.log(data[d])
+            dataArray.push(parseFloat(data[d].value))
+        }
+        var minVal = d3.min(dataArray)
+        var maxVal = d3.max(dataArray)
+        var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor])
+
+        // Load GeoJSON data and merge with states data
+        d3.json("/static/us-states.json", function (json) {
+
+            // Loop through each state data value in the .csv file
+            for (var i = 0; i < data.length; i++) {
+
+                // Grab State Name
+                var dataState = data[i].state;
+
+                // Grab data value
+                var dataValue = data[i].value;
+
+                // Find the corresponding state inside the GeoJSON
+                for (var j = 0; j < json.features.length; j++) {
+                    var jsonState = json.features[j].properties.name;
+
+                    if (dataState == jsonState) {
+
+                        // Copy the data value into the JSON
+                        json.features[j].properties.value = dataValue;
+
+                        // Stop looking through the JSON
+                        break;
+                    }
+                }
+            }
+
+            // Bind the data to the SVG and create one path per GeoJSON feature
+            svg.selectAll("path")
+                .data(json.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .style("stroke", "#fff")
+                .style("stroke-width", "1")
+                .style("fill", function (d) {
+                    return ramp(d.properties.value)
+                });
+
+            // add a legend
+            var w = 140, h = 300;
+
+            var key = d3.select("body")
+                .append("svg")
+                .attr("width", w)
+                .attr("height", h)
+                .attr("class", "legend");
+
+            var legend = key.append("defs")
+                .append("svg:linearGradient")
+                .attr("id", "gradient")
+                .attr("x1", "100%")
+                .attr("y1", "0%")
+                .attr("x2", "100%")
+                .attr("y2", "100%")
+                .attr("spreadMethod", "pad");
+
+            legend.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", highColor)
+                .attr("stop-opacity", 1);
+
+            legend.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", lowColor)
+                .attr("stop-opacity", 1);
+
+            key.append("rect")
+                .attr("width", w - 100)
+                .attr("height", h)
+                .style("fill", "url(#gradient)")
+                .attr("transform", "translate(0,10)");
+
+            var y = d3.scaleLinear()
+                .range([h, 0])
+                .domain([minVal, maxVal]);
+
+            var yAxis = d3.axisRight(y);
+
+            key.append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(41,10)")
+                .call(yAxis)
+        });
+    })
+
+</script>
+
+
+</body>
+</html>
