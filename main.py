@@ -208,8 +208,7 @@ def get_state_frequency():
 
 
 def get_pcp_data():
-    attributes = ['Severity', 'Temperature(F)', 'Humidity(%)', 'Visibility(mi)', 'Weather_Condition', 'Sunrise_Sunset',
-                  'Traffic_Signal', 'Junction', 'Wind_Speed(mph)']
+    attributes = ['Severity', 'Temperature(F)', 'Humidity(%)', 'Visibility(mi)', 'Weather_Condition', 'Wind_Speed(mph)']
     df_tmp = df.sample(500)
     df_pcp = df_tmp[attributes]
     data = df_pcp.values
@@ -223,9 +222,6 @@ def get_pcp_data():
         tmp_dic[attributes[3]] = str(val[3])
         tmp_dic[attributes[4]] = str(val[4])
         tmp_dic[attributes[5]] = str(val[5])
-        tmp_dic[attributes[6]] = str(val[6])
-        tmp_dic[attributes[7]] = str(val[7])
-        tmp_dic[attributes[8]] = str(val[8])
         # tmp_dic['label']=labels[i]
         # i+=1
         pcp_list.append(tmp_dic)
