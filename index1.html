@@ -199,23 +199,12 @@
         #metric-modal .metric-chart text#displayDates {
             font-weight: bold;
         }
-        #svgContainer{
-            display: flex;
-        }
-        .topline{
-            display: flex;
-            justify-content: space-evenly;
-            height: 50%;
-        }
-        .bottomline {
-            display: flex;
-            justify-content: space-evenly;
-            height: 50%;
+
         }
     </style>
 </head>
 <body>
-<!--<div class="header" style="background-color: antiquewhite; padding: 20px;
+<div class="header" style="background-color: antiquewhite; padding: 20px;
  display: inline-block;
  width: 100%;
  height: 100%;
@@ -224,33 +213,25 @@
     <div id="child" class="child">
         <h1>WEATHER-ACCIDENT STATS</h1>
     </div>
-</div>-->
-<div id="svgContainer" class="svgContainer" style="background-color:rgb(26, 24, 24);">
-<div id="parent2" style="width: 70%;">
-    <div class="topline">
-        <div id="chloropleth" style="border-style: solid;border-color: rgb(204, 178, 178);"></div>
-        <div id="metric-modal" style="border-style:solid; border-color: rgb(204, 178, 178);"></div>
-    </div>
-    <div class="bottomline">
-            <div id="pcp" style="width: 40%;border-style: ridge; border-color:rgb(204, 178, 178); background-color:rgb(26, 24, 24);"></div>
-            <div style="width: 60%;
-            border-style: solid;
-            border-color:rgb(204, 178, 178); background-color:rgb(26, 24, 24);"> 
-            <div style="display: flex; justify-content: space-evenly;">
-                <svg id="mysvg2" width="350" height="300"></svg>
-                <svg id="mysvg3" width="350" height="300"></svg>
-            </div> 
-            <div style="display: flex; justify-content: space-evenly;">   
-                <svg id="mysvg4" width="350" height="300"></svg>
-                <svg id="mysvg5" width="350" height="300"></svg>
-            </div>
-            </div>
-    </div>
 </div>
-<div id="parent1" style="width: 30%;">
-    <div class="rightScreen">
-        <svg id="mysvg1" width="500" height="600"></svg>
+<div id="svgContainer" class="svgContainer" style="background-color:lightgray;">
+<div>
+    <div class="" style="width: 50%;float: left;">
+        <!-- <input type="radio" id="states" name="myradio" value="states">
+         <label for="myradio">STATES</label>
+         <input type="radio" id="county" name="myradio" value="county">
+         <label for="myradio">COUNTY</label><br>
+        <button class="submit" onclick="handleSubmit()">Refresh</button> -->
+        <svg id="mysvg1" width="700" height="700"></svg>
     </div>
+    <div style="width: 50%;float: left;">
+        <svg id="mysvg2" width="350" height="300"></svg>
+        <svg id="mysvg3" width="350" height="300"></svg>
+        <svg id="mysvg4" width="350" height="300"></svg>
+        <svg id="mysvg5" width="350" height="300"></svg>
+    </div>
+<div id="pcp"></div>
+<div id="metric-modal"></div>
 </div>
 </div>
 <script src="https://d3js.org/d3.v3.js"></script>
@@ -1189,8 +1170,8 @@
 
         const createPCP = (data) => {
             var margin = {top: 50, right: 50, bottom: 50, left: 50},
-                width = 350 - margin.left - margin.right,
-                height = 300 - margin.top - margin.bottom;
+                width = 900 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
 
             var color = d3.scaleOrdinal()
                 .range(["#5DA5B3", "#D58323", "#DD6CA7", "#54AF52", "#8C92E8", "#E15E5A", "#725D82", "#776327", "#50AB84", "#954D56", "#AB9C27", "#517C3F", "#9D5130", "#357468", "#5E9ACF", "#C47DCB", "#7D9E33", "#DB7F85", "#BA89AD", "#4C6C86", "#B59248", "#D8597D", "#944F7E", "#D67D4B", "#8F86C2"]);
@@ -1412,7 +1393,7 @@
             return response.json()
         }).then(function (data) {
 //Width and height of map
-        var width = 500;
+        var width = 960;
         var height = 500;
 
         var lowColor = '#ffffed'
@@ -1420,15 +1401,15 @@
 
 // D3 Projection
         var projection = d3.geoAlbersUsa()
-            .translate([width / 2, height /3]) // translate to center of screen
-            .scale([500]); // scale things down so see entire US
+            .translate([width / 2, height / 2]) // translate to center of screen
+            .scale([1000]); // scale things down so see entire US
 
 // Define path generator
         var path = d3.geoPath() // path generator that will convert GeoJSON to SVG paths
             .projection(projection); // tell path generator to use albersUsa projection
 
 //Create SVG element and append map to the SVG
-        var svg = d3.select("#chloropleth")
+        var svg = d3.select("body")
             .append("svg")
             .attr("width", width)
             .attr("height", height);
@@ -1536,8 +1517,8 @@
         var metricName = "views";
         var metricCount = data.freq;
         var metricMonths = data.times;
-        var optwidth = 420;
-        var optheight = 300;
+        var optwidth = 600;
+        var optheight = 370;
 
 
         /*

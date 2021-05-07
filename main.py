@@ -10,8 +10,10 @@ import datetime
 import re
 
 app = Flask(__name__, static_url_path='/static')
-df = pd.read_csv('data/US_Accidents_Dec20 copy.csv')
+df = pd.read_csv('data/US_Accidents_Dec20_copy.csv')
 df = df.sample(3000)
+
+
 
 us_state_abbrev = {
     'AL': 'Alabama',
