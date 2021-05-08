@@ -199,14 +199,17 @@
         #metric-modal .metric-chart text#displayDates {
             font-weight: bold;
         }
-        #svgContainer{
+
+        #svgContainer {
             display: flex;
         }
-        .topline{
+
+        .topline {
             display: flex;
             justify-content: space-evenly;
             height: 50%;
         }
+
         .bottomline {
             display: flex;
             justify-content: space-evenly;
@@ -226,32 +229,33 @@
     </div>
 </div>-->
 <div id="svgContainer" class="svgContainer" style="background-color:rgb(26, 24, 24);">
-<div id="parent2" style="width: 70%;">
-    <div class="topline">
-        <div id="chloropleth" style="border-style: solid;border-color: rgb(204, 178, 178);"></div>
-        <div id="metric-modal" style="border-style:solid; border-color: rgb(204, 178, 178);"></div>
-    </div>
-    <div class="bottomline">
-            <div id="pcp" style="width: 40%;border-style: ridge; border-color:rgb(204, 178, 178); background-color:rgb(26, 24, 24);"></div>
+    <div id="parent2" style="width: 70%;">
+        <div class="topline">
+            <div id="chloropleth" style="border-style: solid;border-color: rgb(204, 178, 178);"></div>
+            <div id="metric-modal" style="border-style:solid; border-color: rgb(204, 178, 178);"></div>
+        </div>
+        <div class="bottomline">
+            <div id="pcp"
+                 style="width: 40%;border-style: ridge; border-color:rgb(204, 178, 178); background-color:rgb(26, 24, 24);"></div>
             <div style="width: 60%;
             border-style: solid;
-            border-color:rgb(204, 178, 178); background-color:rgb(26, 24, 24);"> 
-            <div style="display: flex; justify-content: space-evenly;">
-                <svg id="mysvg2" width="350" height="300"></svg>
-                <svg id="mysvg3" width="350" height="300"></svg>
-            </div> 
-            <div style="display: flex; justify-content: space-evenly;">   
-                <svg id="mysvg4" width="350" height="300"></svg>
-                <svg id="mysvg5" width="350" height="300"></svg>
+            border-color:rgb(204, 178, 178); background-color:rgb(26, 24, 24);">
+                <div style="display: flex; justify-content: space-evenly;">
+                    <svg id="mysvg2" width="350" height="300"></svg>
+                    <svg id="mysvg3" width="350" height="300"></svg>
+                </div>
+                <div style="display: flex; justify-content: space-evenly;">
+                    <svg id="mysvg4" width="350" height="300"></svg>
+                    <svg id="mysvg5" width="350" height="300"></svg>
+                </div>
             </div>
-            </div>
+        </div>
     </div>
-</div>
-<div id="parent1" style="width: 30%;">
-    <div class="rightScreen">
-        <svg id="mysvg1" width="500" height="600"></svg>
+    <div id="parent1" style="width: 30%;">
+        <div class="rightScreen">
+            <svg id="mysvg1" width="500" height="600"></svg>
+        </div>
     </div>
-</div>
 </div>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
@@ -286,7 +290,7 @@
                 .attr("font-size", "24px")
                 .text("BAR CHART:" + "STATES");
 
-            var yScale = d3.scaleBand().range([0,height]).padding(0.4);
+            var yScale = d3.scaleBand().range([0, height]).padding(0.4);
             xScale = d3.scaleLinear().range([0, width]);
 
             var g = svg
@@ -345,13 +349,13 @@
                 .attr("text-anchor", "end")
                 .attr("stroke", "black")
                 .text("STATES");
-            
+
             g.selectAll(".bar")
                 .data(myData)
                 .enter()
                 .append("rect")
                 .attr("class", "bar")
-                .attr("fill","orange")
+                .attr("fill", "orange")
                 .on("mouseover", onMouseOver)
                 .on("mouseout", onMouseOut)
                 .on("click", onMouseClick)
@@ -369,7 +373,7 @@
             function onMouseOver(d, i) {
                 d3.select(this).attr('class', 'highlight');
                 d3.select(this)
-                    .attr("fill","red")
+                    .attr("fill", "red")
                     .transition()
                     .duration(200)
                     .attr('width', xScale.bandwidth() + 5)
@@ -392,13 +396,13 @@
                     .text(function () {
                         return [+d.value];
                     })
-                    .attr("fill","red");
+                    .attr("fill", "red");
             }
 
             function onMouseOut(d, i) {
                 d3.select(this).attr('class', 'bar');
                 d3.select(this)
-                    .attr("fill","orange")
+                    .attr("fill", "orange")
                     .transition()
                     .duration(200)
                     .attr("x", function (d) {
@@ -503,7 +507,7 @@
                             .enter()
                             .append("rect")
                             .attr("class", "bar")
-                            .attr("fill","orange")
+                            .attr("fill", "orange")
                             .on("mouseover", onMouseOver_county)
                             .on("mouseout", onMouseOut_county)
                             .on("click", onMouseClick_county)
@@ -521,7 +525,7 @@
                         function onMouseOver_county(d, i) {
                             d3.select(this).attr('class', 'highlight');
                             d3.select(this)
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_county.bandwidth() + 5)
@@ -544,12 +548,13 @@
                                 .text(function () {
                                     return [+d.value];
                                 })
-                                .attr("fill","red");
+                                .attr("fill", "red");
                         }
+
                         function onMouseOut_county(d, i) {
                             d3.select(this).attr('class', 'bar');
                             d3.select(this)
-                                .attr("fill","orange")
+                                .attr("fill", "orange")
                                 .transition()
                                 .duration(200)
                                 .attr("x", function (d) {
@@ -681,7 +686,7 @@
                             .enter()
                             .append("rect")
                             .attr("class", "bar")
-                            .attr("fill","orange")
+                            .attr("fill", "orange")
                             .on("mouseover", onMouseOver_year)
                             .on("mouseout", onMouseOut_year)
                             .attr("x", function (d) {
@@ -698,7 +703,7 @@
                         function onMouseOver_year(d, i) {
                             d3.select(this).attr('class', 'highlight');
                             d3.select(this)
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_year.bandwidth() + 5)
@@ -711,7 +716,7 @@
 
                             g.append("text")
                                 .attr('class', 'val')
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .attr('x', function () {
                                     return xScale_year(d.key);
                                 })
@@ -726,7 +731,7 @@
                         function onMouseOut_year(d, i) {
                             d3.select(this).attr('class', 'bar');
                             d3.select(this)
-                                .attr("fill","orange")
+                                .attr("fill", "orange")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_year.bandwidth())
@@ -824,7 +829,7 @@
                             .enter()
                             .append("rect")
                             .attr("class", "bar")
-                            .attr("fill","orange")
+                            .attr("fill", "orange")
                             .on("mouseover", onMouseOver_month)
                             .on("mouseout", onMouseOut_month)
                             .attr("x", function (d) {
@@ -841,7 +846,7 @@
                         function onMouseOver_month(d, i) {
                             d3.select(this).attr('class', 'highlight');
                             d3.select(this)
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_month.bandwidth() + 5)
@@ -854,7 +859,7 @@
 
                             g.append("text")
                                 .attr('class', 'val')
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .attr('x', function () {
                                     return xScale_month(d.key);
                                 })
@@ -869,7 +874,7 @@
                         function onMouseOut_month(d, i) {
                             d3.select(this).attr('class', 'bar');
                             d3.select(this)
-                                .attr("fill","orange")
+                                .attr("fill", "orange")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_month.bandwidth())
@@ -966,7 +971,7 @@
                             .enter()
                             .append("rect")
                             .attr("class", "bar")
-                            .attr("fill","orange")
+                            .attr("fill", "orange")
                             .on("mouseover", onMouseOver_day)
                             .on("mouseout", onMouseOut_day)
                             .attr("x", function (d) {
@@ -983,7 +988,7 @@
                         function onMouseOver_day(d, i) {
                             d3.select(this).attr('class', 'highlight');
                             d3.select(this)
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_day.bandwidth() + 5)
@@ -996,7 +1001,7 @@
 
                             g.append("text")
                                 .attr('class', 'val')
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .attr('x', function () {
                                     return xScale_day(d.key);
                                 })
@@ -1011,7 +1016,7 @@
                         function onMouseOut_day(d, i) {
                             d3.select(this).attr('class', 'bar');
                             d3.select(this)
-                                .attr("fill","orange")
+                                .attr("fill", "orange")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_day.bandwidth())
@@ -1109,7 +1114,7 @@
                             .enter()
                             .append("rect")
                             .attr("class", "bar")
-                            .attr("fill","orange")
+                            .attr("fill", "orange")
                             .on("mouseover", onMouseOver_time)
                             .on("mouseout", onMouseOut_time)
                             .attr("x", function (d) {
@@ -1126,7 +1131,7 @@
                         function onMouseOver_time(d, i) {
                             d3.select(this).attr('class', 'highlight');
                             d3.select(this)
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_time.bandwidth() + 5)
@@ -1139,7 +1144,7 @@
 
                             g.append("text")
                                 .attr('class', 'val')
-                                .attr("fill","red")
+                                .attr("fill", "red")
                                 .attr('x', function () {
                                     return xScale_time(d.key);
                                 })
@@ -1154,7 +1159,7 @@
                         function onMouseOut_time(d, i) {
                             d3.select(this).attr('class', 'bar');
                             d3.select(this)
-                                .attr("fill","orange")
+                                .attr("fill", "orange")
                                 .transition()
                                 .duration(200)
                                 .attr('width', xScale_time.bandwidth())
@@ -1420,7 +1425,7 @@
 
 // D3 Projection
         var projection = d3.geoAlbersUsa()
-            .translate([width / 2, height /3]) // translate to center of screen
+            .translate([width / 2, height / 3]) // translate to center of screen
             .scale([500]); // scale things down so see entire US
 
 // Define path generator
@@ -1533,42 +1538,45 @@
         .then(function (response) {
             return response.json()
         }).then(function (data) {
+
+
+// example data
         var metricName = "views";
         var metricCount = data.freq;
         var metricMonths = data.times;
-        var optwidth = 420;
-        var optheight = 300;
+        var optwidth = 500;
+        var optheight = 310;
 
 
         /*
-    * ========================================================================
-    *  Prepare data
-    * ========================================================================
-    */
+        * ========================================================================
+        *  Prepare data
+        * ========================================================================
+        */
 
-        // Combine the months and count array to make "data"
+// Combine the months and count array to make "data"
         var dataset = [];
         for (var i = 0; i < metricCount.length; i++) {
             var obj = {count: metricCount[i], month: metricMonths[i]};
             dataset.push(obj);
         }
 
-        // format month as a date
+// format month as a date
         dataset.forEach(function (d) {
             d.month = d3v3.time.format("%Y-%m").parse(d.month);
         });
 
-        // sort dataset by month
+// sort dataset by month
         dataset.sort(function (x, y) {
             return d3v3.ascending(x.month, y.month);
         });
 
 
         /*
-    * ========================================================================
-    *  sizing
-    * ========================================================================
-    */
+        * ========================================================================
+        *  sizing
+        * ========================================================================
+        */
 
         /* === Focus chart === */
 
@@ -1578,16 +1586,16 @@
 
         /* === Context chart === */
 
-        var margin_context = {top: 320, right: 30, bottom: 20, left: 20},
-            height_context = optheight - margin_context.top - margin_context.bottom;
+        var margin_context = {top: 220, right: 30, bottom: 20, left: 20},
+            height_context = 30;
 
         /*
-    * ========================================================================
-    *  x and y coordinates
-    * ========================================================================
-    */
+        * ========================================================================
+        *  x and y coordinates
+        * ========================================================================
+        */
 
-        // the date range of available data:
+// the date range of available data:
         var dataXrange = d3v3.extent(dataset, function (d) {
             return d.month;
         });
@@ -1595,7 +1603,7 @@
             return d.count;
         })];
 
-        // maximum date range allowed to display
+// maximum date range allowed to display
         var mindate = dataXrange[0],  // use the range of the data
             maxdate = dataXrange[1];
 
@@ -1615,11 +1623,11 @@
             }]
         ]);
 
-        // var dynamicDateFormat =  timeFormat([
-        //     [d3v3.time.format("%Y"), function() { return true; }],
-        //     [d3v3.time.format("%b"), function(d) { return d.getMonth(); }],
-        //     [function(){return "";}, function(d) { return d.getDate() != 1; }]
-        // ]);
+// var dynamicDateFormat =  timeFormat([
+//     [d3v3.time.format("%Y"), function() { return true; }],
+//     [d3v3.time.format("%b"), function(d) { return d.getMonth(); }],
+//     [function(){return "";}, function(d) { return d.getDate() != 1; }]
+// ]);
 
         /* === Focus Chart === */
 
@@ -1661,10 +1669,10 @@
             .tickFormat(dynamicDateFormat);
 
         /*
-    * ========================================================================
-    *  Plotted line and area variables
-    * ========================================================================
-    */
+        * ========================================================================
+        *  Plotted line and area variables
+        * ========================================================================
+        */
 
         /* === Focus Chart === */
 
@@ -1705,10 +1713,10 @@
             });
 
         /*
-    * ========================================================================
-    *  Variables for brushing and zooming behaviour
-    * ========================================================================
-    */
+        * ========================================================================
+        *  Variables for brushing and zooming behaviour
+        * ========================================================================
+        */
 
         var brush = d3v3.svg.brush()
             .x(x2)
@@ -1720,12 +1728,12 @@
             .on("zoomend", brushend);
 
         /*
-    * ========================================================================
-    *  Define the SVG area ("vis") and append all the layers
-    * ========================================================================
-    */
+        * ========================================================================
+        *  Define the SVG area ("vis") and append all the layers
+        * ========================================================================
+        */
 
-        // === the main components === //
+// === the main components === //
 
         var vis = d3v3.select("#metric-modal").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -1755,7 +1763,7 @@
             .call(zoom)
             .call(draw);
 
-        // === current date range text & zoom buttons === //
+// === current date range text & zoom buttons === //
 
         var display_range_group = vis.append("g")
             .attr("id", "buttons_group")
@@ -1777,12 +1785,12 @@
             .style("text-anchor", "start")
             .attr("transform", "translate(" + 180 + "," + 10 + ")");
 
-        // === the zooming/scaling buttons === //
+// === the zooming/scaling buttons === //
 
         var button_width = 40;
         var button_height = 14;
 
-        // don't show year button if < 1 year of data
+// don't show year button if < 1 year of data
         var dateRange = dataXrange[1] - dataXrange[0],
             ms_in_year = 31540000000;
 
@@ -1897,17 +1905,17 @@
             .attr("transform", "rotate(-90)")
             .style("text-anchor", "middle");
 
-        // allows zooming before any brush action
+// allows zooming before any brush action
         zoom.x(x);
 
         /*
-    * ========================================================================
-    *  Functions
-    * ========================================================================
-    */
+        * ========================================================================
+        *  Functions
+        * ========================================================================
+        */
 
-        // === tick/date formatting functions ===
-        // from: https://stackoverflow.com/questions/20010864/d3v3-axis-labels-become-too-fine-grained-when-zoomed-in
+// === tick/date formatting functions ===
+// from: https://stackoverflow.com/questions/20010864/d3v3-axis-labels-become-too-fine-grained-when-zoomed-in
 
         function timeFormat(formats) {
             return function (date) {
@@ -1938,7 +1946,7 @@
             return times;
         };
 
-        // === brush and zoom functions ===
+// === brush and zoom functions ===
 
         function brushed() {
 
@@ -2134,9 +2142,12 @@
             brush(d3v3.select(".brush").transition());
             // now fire the brushstart, brushmove, and brushend events
             brush.event(d3v3.select(".brush").transition());
-        };
-
+        }
     });
+
+</script>
+</body>
+
 </script>
 
 
