@@ -208,6 +208,9 @@ def get_state_frequency():
     tmp_df['state'] = tmp_df['state'].map(us_state_abbrev)
     return tmp_df.to_json(orient="records")
 
+def get_county_frequency():
+    tmp_df = df["County"].value_counts().rename_axis('county').reset_index(name='value')
+    return tmp_df.to_json(orient="records")
 
 def get_pcp_data():
     attributes = ['Severity', 'Temperature(F)', 'Humidity(%)', 'Visibility(mi)', 'Weather_Condition', 'Wind_Speed(mph)']
@@ -281,6 +284,11 @@ def time_series():
 @app.route("/chloropleth")
 def state_frequency():
     myList = get_state_frequency()
+    return myList
+
+@app.route("/chloropleth-counties")
+def county_frequency():
+    myList = get_county_frequency()
     return myList
 
 
