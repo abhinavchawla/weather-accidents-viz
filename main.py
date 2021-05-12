@@ -11,7 +11,7 @@ import re
 
 app = Flask(__name__, static_url_path='/static')
 df = pd.read_csv('data/US_Accidents_Dec20_copy.csv')
-df = df.sample(3000)
+df = df.sample(300000)
 
 
 
@@ -253,6 +253,7 @@ def bar_state_year():
 
 @app.route("/bar_state_month")
 def bar_state_month():
+    print("HELLO")
     myList = get_time_for_all_states("month")
     return jsonify(myList)
 
