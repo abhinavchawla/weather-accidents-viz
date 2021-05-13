@@ -2258,6 +2258,7 @@ const createDayChartBar = (id, dayData, Name) => {
                                 .style("opacity", 0);
                         })
                         .on('click', function (d) {
+                            time_update=false
                             stateZoom(d.id)
                         })
                         if(current_state!=-1) {

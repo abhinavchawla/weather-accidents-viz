@@ -15,8 +15,10 @@ import json
 app = Flask(__name__, static_url_path='/static')
 df = pd.read_csv('data/US_Accidents_Dec20_copy.csv')
 df = df.sample(300000)
+df['End_Time'] = pd.to_datetime(df['End_Time'])
 
 current_df = df
+
 current_state = None
 current_start_time = None
 current_end_time = None
@@ -145,8 +147,6 @@ def get_state_time(time_range, state=''):
     day_dic = {'Monday': 0, 'Tuesday': 0, 'Wednesday': 0, 'Thursday': 0, 'Friday': 0, 'Saturday': 0, 'Sunday': 0}
     hour_dic = {'00-02': 0, '02-04': 0, '04-06': 0, '06-08': 0, '08-10': 0, '10-12': 0, '12-14': 0, '14-16': 0, '16-18': 0, '18-20': 0, '20-22': 0, '22-00': 0}
     print(current_df)
-
-    current_df['End_Time'] = pd.to_datetime(current_df['End_Time'])
 
     if (time_range == 'year'):
         tmp_data = current_df.groupby(current_df['End_Time'].dt.strftime('%Y')).count()
