@@ -295,8 +295,14 @@
 <h2 style="text-align:center;">WEATHER-ACCIDENT STATS</h2>
 <div id="svgContainer" class="svgContainer">
     <div id="parent">
-        <div id="chloropleth" class="card"><h3>UNITED STATES OF AMERICA</h3></div>
-        <div id="metric-modal" class="card"><h3>ACCIDENT TIME SERIES</h3></div>
+        <div id="chloropleth" class="card"><h3>UNITED STATES OF AMERICA</h3>
+                            <svg id="mysvg7" width="450" height="250"></svg>
+                                        <svg id="mysvg8" width="130" height="230"></svg>
+
+        </div>
+        <div id="metric-modal" class="card"><h3>ACCIDENT TIME SERIES</h3>
+                    <svg id="mysvg6" width="320" height="300"></svg>
+        </div>
         <div id="pcp" class="card"><h3>PARALLEL AXIS PLOT</h3></div>
         <div class="card"><svg id="mysvg1" width="600" height="400"></svg></div>
         <div class="card" style="display: flex; justify-content: space-evenly;">
@@ -368,6 +374,8 @@
     tooltip = d3.select("body").append("div")
 	.attr("class", "tooltip")
 	.style("opacity", 0);
+    function updateRestOfChart() {
+
     fetch('/bar')
         .then(function (response) {
             return response.json()
@@ -469,6 +477,13 @@
                 .attr("height", function (d) {
                     return height - yScale(+d.value);
                 });
+            console.log("HI")
+            console.log(myData)
+            console.log(myData.length)
+            if (myData.length===1){
+                console.log("HI")
+                onMouseClick(myData[0])
+            }
 
             function onMouseOver(d, i) {
                 d3.select(this).attr('class', 'highlight');
@@ -1516,230 +1531,10 @@ const createDayChartBar = (id, dayData, Name) => {
         };
         createPCP(text);
     });
+    }
 
-    fetch('/chloropleth')
-        .then(function (response) {
-            return response.json()
-        }).then(function (data) {
-        fetch('/chloropleth-counties')
-            .then(function (response) {
-                return response.json()
-            }).then(function (data2) {
-            var width = 450
-            var height = 250
-            var padding = 20
-
-            var projection = d3.geoAlbers()
-                .precision(0)
-                .scale(height * 2).translate([width / 2, height / 2])
-
-            var path = d3.geoPath().projection(projection)
-
-            var svg = d3.select('#chloropleth')
-                .append('svg')
-                .attr('width', width)
-                .attr('height', height)
-                var lowColor = '#f7f7f7'
-                var highColor = '#2166ac'
-                            var dataArray = [];
-                                        var dataArray2 = [];
-
-                for (var d = 0; d < data.length; d++) {
-                    // console.log(data[d])
-                    dataArray.push(parseFloat(data[d].value))
-                }
-                for (var d = 0; d < data2.length; d++) {
-                    // console.log(data[d])
-                    dataArray2.push(parseFloat(data2[d].value))
-                }
-                var minVal = d3.min(dataArray)
-                var maxVal = d3.max(dataArray)
-
-                var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor])
-
-
-            d3.queue()
-                .defer(d3.json, 'static/us-states.json')
-                .defer(d3.json, 'static/us-counties.json')
-                .awaitAll(initialize)
-
-            function initialize(error, results) {
-                if (error) {
-                    throw error
-                }
-                console.log(results[0])
-                var states = topojson.feature(results[0], results[0].objects.states).features
-                var counties = topojson.feature(results[1], results[1].objects.counties).features
-
-                states.forEach(function (f) {
-                    f.properties = data.find(function (d) {
-                        return d.state === f.properties.name
-                    }) || f.properties
-                })
-
-                counties.forEach(function (f) {
-                    f.properties = data2.find(function (d) {
-                        return d.county === f.properties.name
-                    }) || f.properties
-                })
-                var statePaths = svg.selectAll('.state')
-                    .data(states)
-                    .enter().append('path')
-                    .attr('class', 'state')
-                    .attr('d', path)
-                    .style("fill", function (d) {
-                        return ramp(d.properties.value)
-                    })
-                    .on('click', function (d) {
-                        stateZoom(d.id)
-                    })
-
-                function usZoom() {
-                    var t = d3.transition().duration(800)
-
-                    projection.scale(height * 2).translate([width / 2, height / 2])
-
-                    statePaths.transition(t)
-                        .attr('d', path)
-                        .style('fill', function (d) {
-                            return ramp(d.properties.value)
-                        })
-
-                    svg.selectAll('.county')
-                        .data([])
-                        .exit().transition(t)
-                        .attr('d', path)
-                        .style('opacity', 0)
-                        .remove()
-                }
-
-                function stateZoom(id) {
-                    var state = states.find(function (d) {
-                        return d.id === id
-                    })
-                    var stateCounties = counties.filter(function (d) {
-                        if(d.id > id && d.id < id + 999) {
-                            console.log(d)
-                            return true;
-                        }
-
-                        return false;
-                    })
-
-                    var dataArray2=[]
-                    for (var d = 0; d < stateCounties.length; d++) {
-                    dataArray2.push(parseFloat(stateCounties[d].properties.value))
-                }
-                    var minVal2 = d3.min(dataArray2)
-                var maxVal2 = d3.max(dataArray2)
-
-                var ramp_counties = d3.scaleLinear().domain([minVal2, maxVal2]).range([lowColor, highColor])
-
-                    var t = d3.transition().duration(800)
-
-                    var countyPaths = svg.selectAll('.county')
-                        .data(stateCounties, function (d) {
-                            return d.id
-                        })
-
-                    var enterCountyPaths = countyPaths.enter().append('path')
-                        .attr('class', 'county')
-                        .attr('d', path)
-                        .attr('subclass', function (d) {
-                            return d.properties.county
-                        })
-                        .style('fill', function (d) {
-                            return ramp_counties(d.properties.value || 0)
-                        })
-                        .style('opacity', 0)
-                        .on("mouseover", function(d) {
-                            tooltip.transition()
-                            .duration(250)
-                            .style("opacity", 1);
-                            console.log(d.properties)
-                            tooltip.html(
-                            "<p><strong>" + d.properties.county + ": " + d.properties.value+ "</strong></p>")
-                            .style("left", (d3.event.pageX + 15) + "px")
-                            .style("top", (d3.event.pageY - 28) + "px");
-                        })
-                        .on("mouseout", function(d) {
-                            tooltip.transition()
-                            .duration(250)
-                            .style("opacity", 0);
-                        })
-
-                        .on('click', function () {
-                            usZoom()
-                        })
-
-                    projection.fitExtent(
-                        [[padding, padding], [width - padding, height - padding]],
-                        state
-                    )
-
-                    statePaths.transition(t)
-                        .attr('d', path)
-                        .style('fill', '#444')
-
-                    console.log(enterCountyPaths)
-                    enterCountyPaths.transition(t)
-                        .attr('d', path)
-                        .style('opacity', 1)
-
-                    countyPaths.exit().transition(t)
-                        .attr('d', path)
-                        .style('opacity', 0)
-                        .remove()
-                }
-            }
-
-            // add a legend
-            var w = 130, h = 230;
-
-            var key = d3.select("#chloropleth")
-                .append("svg")
-                .attr("width", w)
-                .attr("height", h)
-                .attr("class", "legend");
-
-            var legend = key.append("defs")
-                .append("svg:linearGradient")
-                .attr("id", "gradient")
-                .attr("x1", "100%")
-                .attr("y1", "0%")
-                .attr("x2", "100%")
-                .attr("y2", "100%")
-                .attr("spreadMethod", "pad");
-
-            legend.append("stop")
-                .attr("offset", "0%")
-                .attr("stop-color", highColor)
-                .attr("stop-opacity", 1);
-
-            legend.append("stop")
-                .attr("offset", "100%")
-                .attr("stop-color", lowColor)
-                .attr("stop-opacity", 1);
-
-            key.append("rect")
-                .attr("width", 30)
-                .attr("height", h)
-                .style("fill", "url(#gradient)")
-                .attr("transform", "translate(0,10)");
-
-            var y = d3.scaleLinear()
-                .range([h, 0])
-                .domain([minVal, maxVal]);
-
-            var yAxis = d3.axisRight(y);
-
-            key.append("g")
-                .attr("class", "y axis")
-                .attr("transform", "translate(31,10)")
-                .call(yAxis)
-        });
-    });
-    // example data
+    function updateTimeSeries(){
+        // example data
     fetch('/time_series')
         .then(function (response) {
             return response.json()
@@ -1940,8 +1735,9 @@ const createDayChartBar = (id, dayData, Name) => {
         */
 
 // === the main components === //
+        document.getElementById("mysvg6").innerHTML = '';
 
-        var vis = d3v3.select("#metric-modal").append("svg")
+        var vis = d3v3.select("#mysvg6")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .attr("class", "metric-chart"); // CB -- "line-chart" -- CB //
@@ -2155,7 +1951,6 @@ const createDayChartBar = (id, dayData, Name) => {
 // === brush and zoom functions ===
 
         function brushed() {
-
             x.domain(brush.empty() ? x2.domain() : brush.extent());
             focus.select(".area").attr("d", area);
             focus.select(".line").attr("d", line);
@@ -2182,7 +1977,19 @@ const createDayChartBar = (id, dayData, Name) => {
 
         function brushend() {
 // when brush stops moving:
-
+            console.log(brush.extent())
+            var _data = {start_time: brush.extent()[1], end_time: brush.extent()[0]}
+            console.log(_data)
+            fetch('/update/time', {
+                      method: "POST",
+                      body: JSON.stringify(_data),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(function(response){
+                        updateRestOfChart()
+                        updateChloropleth()
+                    });
             // check whether chart was scrolled out of bounds and fix,
             var b = brush.extent();
             var out_of_bounds = brush.extent().some(function (e) {
@@ -2350,6 +2157,254 @@ const createDayChartBar = (id, dayData, Name) => {
             brush.event(d3v3.select(".brush").transition());
         }
     });
+    }
+    function updateChloropleth() {
+        fetch('/chloropleth')
+            .then(function (response) {
+                return response.json()
+            }).then(function (data) {
+            fetch('/chloropleth-counties')
+                .then(function (response) {
+                    return response.json()
+                }).then(function (data2) {
+                document.getElementById("mysvg7").innerHTML = '';
+                var width = 450
+                var height = 250
+                var padding = 20
+
+                var projection = d3.geoAlbers()
+                    .precision(0)
+                    .scale(height * 2).translate([width / 2, height / 2])
+
+                var path = d3.geoPath().projection(projection)
+
+                var svg = d3.select('#mysvg7')
+                    .attr('width', width)
+                    .attr('height', height)
+                var lowColor = '#f7f7f7'
+                var highColor = '#2166ac'
+                var dataArray = [];
+                var dataArray2 = [];
+
+                for (var d = 0; d < data.length; d++) {
+                    // console.log(data[d])
+                    dataArray.push(parseFloat(data[d].value))
+                }
+                for (var d = 0; d < data2.length; d++) {
+                    // console.log(data[d])
+                    dataArray2.push(parseFloat(data2[d].value))
+                }
+                var minVal = d3.min(dataArray)
+                var maxVal = d3.max(dataArray)
+
+                var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor])
+
+
+                d3.queue()
+                    .defer(d3.json, 'static/us-states.json')
+                    .defer(d3.json, 'static/us-counties.json')
+                    .awaitAll(initialize)
+
+                function initialize(error, results) {
+                    if (error) {
+                        throw error
+                    }
+                    console.log(results[0])
+                    var states = topojson.feature(results[0], results[0].objects.states).features
+                    var counties = topojson.feature(results[1], results[1].objects.counties).features
+
+                    states.forEach(function (f) {
+                        f.properties = data.find(function (d) {
+                            return d.state === f.properties.name
+                        }) || f.properties
+                    })
+
+                    counties.forEach(function (f) {
+                        f.properties = data2.find(function (d) {
+                            return d.county === f.properties.name
+                        }) || f.properties
+                    })
+                    var statePaths = svg.selectAll('.state')
+                        .data(states)
+                        .enter().append('path')
+                        .attr('class', 'state')
+                        .attr('d', path)
+                        .style("fill", function (d) {
+                            return ramp(d.properties.value)
+                        })
+                        .on('click', function (d) {
+                            stateZoom(d.id)
+                        })
+
+                    function usZoom() {
+                        var t = d3.transition().duration(800)
+
+                        projection.scale(height * 2).translate([width / 2, height / 2])
+
+                        statePaths.transition(t)
+                            .attr('d', path)
+                            .style('fill', function (d) {
+                                return ramp(d.properties.value)
+                            })
+
+                        svg.selectAll('.county')
+                            .data([])
+                            .exit().transition(t)
+                            .attr('d', path)
+                            .style('opacity', 0)
+                            .remove()
+                        fetch('/update/null', {
+                            method: "POST",
+                        }).then(function (response) {
+                            updateRestOfChart()
+                            updateTimeSeries()
+                        });
+                    }
+
+                    function stateZoom(id) {
+
+                        var state = states.find(function (d) {
+                            return d.id === id
+                        })
+                        var stateCounties = counties.filter(function (d) {
+                            if (d.id > id && d.id < id + 999) {
+                                return true;
+                            }
+
+                            return false;
+                        })
+                        let _data = {
+                            state: state.properties.state
+                        }
+                        fetch('/update/' + state.properties.state, {
+                            method: "POST",
+                            body: JSON.stringify(_data)
+                        }).then(function (response) {
+                            updateRestOfChart()
+                            updateTimeSeries()
+                        });
+                        var dataArray2 = []
+                        for (var d = 0; d < stateCounties.length; d++) {
+                            dataArray2.push(parseFloat(stateCounties[d].properties.value))
+                        }
+                        var minVal2 = d3.min(dataArray2)
+                        var maxVal2 = d3.max(dataArray2)
+
+                        var ramp_counties = d3.scaleLinear().domain([minVal2, maxVal2]).range([lowColor, highColor])
+
+                        var t = d3.transition().duration(800)
+
+                        var countyPaths = svg.selectAll('.county')
+                            .data(stateCounties, function (d) {
+                                return d.id
+                            })
+
+                        var enterCountyPaths = countyPaths.enter().append('path')
+                            .attr('class', 'county')
+                            .attr('d', path)
+                            .attr('subclass', function (d) {
+                                return d.properties.county
+                            })
+                            .style('fill', function (d) {
+                                return ramp_counties(d.properties.value || 0)
+                            })
+                            .style('opacity', 0)
+                            .on("mouseover", function (d) {
+                                tooltip.transition()
+                                    .duration(250)
+                                    .style("opacity", 0);
+                                tooltip.transition()
+                                    .duration(250)
+                                    .style("opacity", 1);
+                                tooltip.html(
+                                    "<p><strong>" + d.properties.county + ": " + d.properties.value + "</strong></p>")
+                                    .style("left", (d3.event.pageX + 15) + "px")
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                            })
+                            .on("mouseout", function (d) {
+                                tooltip.transition()
+                                    .duration(250)
+                                    .style("opacity", 0);
+                            })
+
+                            .on('click', function () {
+                                usZoom()
+                            })
+
+                        projection.fitExtent(
+                            [[padding, padding], [width - padding, height - padding]],
+                            state
+                        )
+
+                        statePaths.transition(t)
+                            .attr('d', path)
+                            .style('fill', '#444')
+
+                        enterCountyPaths.transition(t)
+                            .attr('d', path)
+                            .style('opacity', 1)
+
+                        countyPaths.exit().transition(t)
+                            .attr('d', path)
+                            .style('opacity', 0)
+                            .remove()
+                    }
+                }
+
+                document.getElementById("mysvg8").innerHTML=''
+                // add a legend
+                var w = 130, h = 230;
+
+                var key = d3.select("#mysvg8")
+                    .attr("width", w)
+                    .attr("height", h)
+                    .attr("class", "legend");
+
+                var legend = key.append("defs")
+                    .append("svg:linearGradient")
+                    .attr("id", "gradient")
+                    .attr("x1", "100%")
+                    .attr("y1", "0%")
+                    .attr("x2", "100%")
+                    .attr("y2", "100%")
+                    .attr("spreadMethod", "pad");
+
+                legend.append("stop")
+                    .attr("offset", "0%")
+                    .attr("stop-color", highColor)
+                    .attr("stop-opacity", 1);
+
+                legend.append("stop")
+                    .attr("offset", "100%")
+                    .attr("stop-color", lowColor)
+                    .attr("stop-opacity", 1);
+
+                key.append("rect")
+                    .attr("width", 30)
+                    .attr("height", h)
+                    .style("fill", "url(#gradient)")
+                    .attr("transform", "translate(0,10)");
+
+                var y = d3.scaleLinear()
+                    .range([h, 0])
+                    .domain([minVal, maxVal]);
+
+                var yAxis = d3.axisRight(y);
+
+                key.append("g")
+                    .attr("class", "y axis")
+                    .attr("transform", "translate(31,10)")
+                    .call(yAxis)
+            });
+        });
+    }
+    fetch('/update/null', {
+                      method: "POST",
+                    }).then(function(response){
+                        updateRestOfChart()
+                        updateTimeSeries()
+                        updateChloropleth()
+                    });
 
 </script>
 </body>
