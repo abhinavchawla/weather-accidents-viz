@@ -294,6 +294,8 @@ def update_current_df(state, start_time=None, end_time=None):
 
     if current_state:
         current_df = df[df['State'].str.contains(us_state_abbrev_reverse[current_state])]
+    else:
+        current_df = df
 
     #Time call
     start_time = datetime.datetime.strptime(start_time[:10], "%Y-%m-%d")

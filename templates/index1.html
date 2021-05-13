@@ -49,7 +49,12 @@
             fill: none;
             stroke: steelblue;
         }
-
+        .state {
+                stroke: #000;
+            }
+                .county {
+                stroke: #000;
+            }
         .brush .extent {
             fill-opacity: .3;
             stroke: #fff;
@@ -295,7 +300,7 @@
 <h2 style="text-align:center;">WEATHER-ACCIDENT STATS</h2>
 <div id="svgContainer" class="svgContainer">
     <div id="parent">
-        <div id="chloropleth" class="card"><h3>UNITED STATES OF AMERICA</h3>
+        <div id="chloropleth" class="card"><h3 id="map-heading">United States Of America</h3>
                             <svg id="mysvg7" width="450" height="250"></svg>
                                         <svg id="mysvg8" width="130" height="230"></svg>
 
@@ -371,6 +376,8 @@
 <script src="//d3js.org/topojson.v1.min.js"></script>
 
 <script>
+        var current_state=-1, time_update=false
+
     tooltip = d3.select("body").append("div")
 	.attr("class", "tooltip")
 	.style("opacity", 0);
@@ -1977,9 +1984,8 @@ const createDayChartBar = (id, dayData, Name) => {
 
         function brushend() {
 // when brush stops moving:
-            console.log(brush.extent())
             var _data = {start_time: brush.extent()[1], end_time: brush.extent()[0]}
-            console.log(_data)
+            time_update=true
             fetch('/update/time', {
                       method: "POST",
                       body: JSON.stringify(_data),
@@ -2204,14 +2210,13 @@ const createDayChartBar = (id, dayData, Name) => {
                     .defer(d3.json, 'static/us-states.json')
                     .defer(d3.json, 'static/us-counties.json')
                     .awaitAll(initialize)
-
+                var statePaths, states, counties
                 function initialize(error, results) {
                     if (error) {
                         throw error
                     }
-                    console.log(results[0])
-                    var states = topojson.feature(results[0], results[0].objects.states).features
-                    var counties = topojson.feature(results[1], results[1].objects.counties).features
+                     states = topojson.feature(results[0], results[0].objects.states).features
+                     counties = topojson.feature(results[1], results[1].objects.counties).features
 
                     states.forEach(function (f) {
                         f.properties = data.find(function (d) {
@@ -2224,7 +2229,8 @@ const createDayChartBar = (id, dayData, Name) => {
                             return d.county === f.properties.name
                         }) || f.properties
                     })
-                    var statePaths = svg.selectAll('.state')
+
+                    statePaths = svg.selectAll('.state')
                         .data(states)
                         .enter().append('path')
                         .attr('class', 'state')
@@ -2232,36 +2238,60 @@ const createDayChartBar = (id, dayData, Name) => {
                         .style("fill", function (d) {
                             return ramp(d.properties.value)
                         })
+                        .on("mouseover", function (d) {
+                            tooltip.transition()
+                                .duration(250)
+                                .style("opacity", 0);
+                            tooltip.transition()
+                                .duration(250)
+                                .style("opacity", 1);
+                            tooltip.html(
+                                "<p><strong>" + d.properties.state + ": " + d.properties.value + "</strong></p>")
+                                .style("left", (d3.event.pageX + 15) + "px")
+                                .style("top", (d3.event.pageY - 28) + "px");
+                        })
+                        .on("mouseout", function (d) {
+                            tooltip.transition()
+                                .duration(250)
+                                .style("opacity", 0);
+                        })
                         .on('click', function (d) {
                             stateZoom(d.id)
                         })
-
+                        if(current_state!=-1) {
+                            stateZoom(current_state)
+                    }
+                }
                     function usZoom() {
-                        var t = d3.transition().duration(800)
-
-                        projection.scale(height * 2).translate([width / 2, height / 2])
-
-                        statePaths.transition(t)
-                            .attr('d', path)
-                            .style('fill', function (d) {
-                                return ramp(d.properties.value)
-                            })
-
-                        svg.selectAll('.county')
-                            .data([])
-                            .exit().transition(t)
-                            .attr('d', path)
-                            .style('opacity', 0)
-                            .remove()
+                    document.getElementById('map-heading').innerHTML='United States Of America'
+                        // var t = d3.transition().duration(800)
+                        //
+                        // projection.scale(height * 2).translate([width / 2, height / 2])
+                        //
+                        // statePaths.transition(t)
+                        //     .attr('d', path)
+                        //     .style('fill', function (d) {
+                        //         return ramp(d.properties.value)
+                        //     })
+                        //
+                        // svg.selectAll('.county')
+                        //     .data([])
+                        //     .exit().transition(t)
+                        //     .attr('d', path)
+                        //     .style('opacity', 0)
+                        //     .remove()
+                        current_state=-1
                         fetch('/update/null', {
                             method: "POST",
                         }).then(function (response) {
                             updateRestOfChart()
                             updateTimeSeries()
+                            updateChloropleth()
                         });
                     }
 
                     function stateZoom(id) {
+                        current_state = id
 
                         var state = states.find(function (d) {
                             return d.id === id
@@ -2270,19 +2300,20 @@ const createDayChartBar = (id, dayData, Name) => {
                             if (d.id > id && d.id < id + 999) {
                                 return true;
                             }
-
                             return false;
                         })
                         let _data = {
                             state: state.properties.state
                         }
-                        fetch('/update/' + state.properties.state, {
-                            method: "POST",
-                            body: JSON.stringify(_data)
-                        }).then(function (response) {
-                            updateRestOfChart()
-                            updateTimeSeries()
-                        });
+                        if(!time_update) {
+                            fetch('/update/' + state.properties.state, {
+                                method: "POST",
+                                body: JSON.stringify(_data)
+                            }).then(function (response) {
+                                updateRestOfChart()
+                                updateTimeSeries()
+                            });
+                        }
                         var dataArray2 = []
                         for (var d = 0; d < stateCounties.length; d++) {
                             dataArray2.push(parseFloat(stateCounties[d].properties.value))
@@ -2348,8 +2379,8 @@ const createDayChartBar = (id, dayData, Name) => {
                             .attr('d', path)
                             .style('opacity', 0)
                             .remove()
+                        document.getElementById("map-heading").innerHTML=state.properties.state
                     }
-                }
 
                 document.getElementById("mysvg8").innerHTML=''
                 // add a legend
