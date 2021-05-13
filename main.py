@@ -144,10 +144,12 @@ def get_state_time(time_range, state=''):
                  'September': 0, 'October': 0, 'November': 0, 'December': 0}
     day_dic = {'Monday': 0, 'Tuesday': 0, 'Wednesday': 0, 'Thursday': 0, 'Friday': 0, 'Saturday': 0, 'Sunday': 0}
     hour_dic = {'00-02': 0, '02-04': 0, '04-06': 0, '06-08': 0, '08-10': 0, '10-12': 0, '12-14': 0, '14-16': 0, '16-18': 0, '18-20': 0, '20-22': 0, '22-00': 0}
-    current_df.Start_Time = pd.to_datetime(current_df.Start_Time)
+    print(current_df)
+
+    current_df['End_Time'] = pd.to_datetime(current_df['End_Time'])
 
     if (time_range == 'year'):
-        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%Y')).count()
+        tmp_data = current_df.groupby(current_df['End_Time'].dt.strftime('%Y')).count()
         tmp_year_dic = tmp_data.to_dict()
         for key, val in tmp_year_dic['ID'].items():
             year_dic[key] = val
@@ -159,7 +161,7 @@ def get_state_time(time_range, state=''):
             year_list.append(tmp_dic)
         return year_list
     elif (time_range == 'month'):
-        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%B')).count()
+        tmp_data = current_df.groupby(current_df['End_Time'].dt.strftime('%B')).count()
         tmp_month_dic = tmp_data.to_dict()
         for key, val in tmp_month_dic['ID'].items():
             month_dic[key] = val
@@ -171,7 +173,7 @@ def get_state_time(time_range, state=''):
             month_list.append(tmp_dic)
         return month_list
     elif (time_range == 'day'):
-        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%A')).count()
+        tmp_data = current_df.groupby(current_df['End_Time'].dt.strftime('%A')).count()
         tmp_day_dic = tmp_data.to_dict()
         for key, val in tmp_day_dic['ID'].items():
             day_dic[key] = val
@@ -183,7 +185,7 @@ def get_state_time(time_range, state=''):
             day_list.append(tmp_dic)
         return day_list
     elif (time_range == 'hour'):
-        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%H')).count()
+        tmp_data = current_df.groupby(current_df['End_Time'].dt.strftime('%H')).count()
         tmp_hour_dic = tmp_data.to_dict()
         for key, val in tmp_hour_dic['ID'].items():
             if (int(key) < 2):
@@ -285,13 +287,13 @@ def get_bar_data():
     return bar_list
 
 def get_time_series_data():
-    tmp_df = current_df.loc[:, ["Start_Time", "ID"]]
-    tmp_df['Start_Time'] = pd.to_datetime(tmp_df['Start_Time'], errors='coerce')
+    tmp_df = current_df.loc[:, ["End_Time", "ID"]]
+    tmp_df['End_Time'] = pd.to_datetime(tmp_df['End_Time'], errors='coerce')
     # column_names = df.columns.values
     # column_names[1] = 'Changed'
     # df.columns = column_names
     # return(tmp_df.groupby([tmp_df['Start_Time'].dt.year, tmp_df['Start_Time'].dt.month]).agg({'count'}))
-    return tmp_df.resample('M', on="Start_Time").agg({'count'})
+    return tmp_df.resample('M', on="End_Time").agg({'count'})
 
 
 def update_current_df(state, start_time=None, end_time=None):
@@ -383,7 +385,7 @@ def bar_state_hour():
 def time_series():
     df_ts = get_time_series_data()
     message = {}
-    message["freq"] = df_ts["Start_Time"]["count"].tolist()
+    message["freq"] = df_ts["End_Time"]["count"].tolist()
     message["times"] = df_ts.index.strftime("%Y-%m").tolist()
 
     return message
