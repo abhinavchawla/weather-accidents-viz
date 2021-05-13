@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
@@ -133,7 +135,6 @@ us_state_abbrev = {
 
 
 def get_state_time(time_range, state=''):
-    data = current_df.loc[:, ['State', 'Start_Time']].values
     month = {'1': 'January', '2': 'February', '3': 'March', '4': 'April', '5': 'May', '6': 'June', '7': 'July',
              '8': 'August', '9': 'September', '10': 'October', '11': 'November', '12': 'December'}
     day = {'0': 'Monday', '1': 'Tuesday', '2': 'Wednesday', '3': 'Thursday', '4': 'Friday', '5': 'Saturday',
@@ -142,27 +143,14 @@ def get_state_time(time_range, state=''):
     month_dic = {'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0,
                  'September': 0, 'October': 0, 'November': 0, 'December': 0}
     day_dic = {'Monday': 0, 'Tuesday': 0, 'Wednesday': 0, 'Thursday': 0, 'Friday': 0, 'Saturday': 0, 'Sunday': 0}
-    hour_dic = {'00-06': 0, '06-12': 0, '12-20': 0, '20-00': 0}
-    for val in data:
-        if (state != ''):
-            if (val[0] != state):
-                continue
-        date_time_str = val[1]
-        match = re.match('\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d', date_time_str)
-        date_time_str = match.group()
-        date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
-        year_dic[str(date_time_obj.year)] += 1
-        month_dic[month[str(date_time_obj.month)]] += 1
-        day_dic[day[str(date_time_obj.weekday())]] += 1
-        if (0 < date_time_obj.hour < 6):
-            hour_dic['00-06'] += 1
-        elif (6 < date_time_obj.hour < 12):
-            hour_dic['06-12'] += 1
-        elif (12 < date_time_obj.hour < 20):
-            hour_dic['12-20'] += 1
-        elif (20 < date_time_obj.hour):
-            hour_dic['20-00'] += 1
+    hour_dic = {'00-02': 0, '02-04': 0, '04-06': 0, '06-08': 0, '08-10': 0, '10-12': 0, '12-14': 0, '14-16': 0, '16-18': 0, '18-20': 0, '20-22': 0, '22-00': 0}
+    current_df.Start_Time = pd.to_datetime(current_df.Start_Time)
+
     if (time_range == 'year'):
+        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%Y')).count()
+        tmp_year_dic = tmp_data.to_dict()
+        for key, val in tmp_year_dic['ID'].items():
+            year_dic[key] = val
         year_list = []
         for key, val in year_dic.items():
             tmp_dic = {}
@@ -171,6 +159,10 @@ def get_state_time(time_range, state=''):
             year_list.append(tmp_dic)
         return year_list
     elif (time_range == 'month'):
+        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%B')).count()
+        tmp_month_dic = tmp_data.to_dict()
+        for key, val in tmp_month_dic['ID'].items():
+            month_dic[key] = val
         month_list = []
         for key, val in month_dic.items():
             tmp_dic = {}
@@ -179,6 +171,10 @@ def get_state_time(time_range, state=''):
             month_list.append(tmp_dic)
         return month_list
     elif (time_range == 'day'):
+        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%A')).count()
+        tmp_day_dic = tmp_data.to_dict()
+        for key, val in tmp_day_dic['ID'].items():
+            day_dic[key] = val
         day_list = []
         for key, val in day_dic.items():
             tmp_dic = {}
@@ -187,6 +183,33 @@ def get_state_time(time_range, state=''):
             day_list.append(tmp_dic)
         return day_list
     elif (time_range == 'hour'):
+        tmp_data = current_df.groupby(current_df['Start_Time'].dt.strftime('%H')).count()
+        tmp_hour_dic = tmp_data.to_dict()
+        for key, val in tmp_hour_dic['ID'].items():
+            if (int(key) < 2):
+                hour_dic['00-02'] += val
+            elif (int(key) > 2 and int(key) < 4):
+                hour_dic['02-04'] += val
+            elif (int(key) > 4 and int(key) < 6):
+                hour_dic['04-06'] += val
+            elif (int(key) > 6 and int(key) < 8):
+                hour_dic['06-08'] += val
+            elif (int(key) > 8 and int(key) < 10):
+                hour_dic['08-10'] += val
+            elif (int(key) > 10 and int(key) < 12):
+                hour_dic['10-12'] += val
+            elif (int(key) > 12 and int(key) < 14):
+                hour_dic['12-14'] += val
+            elif (int(key) > 14 and int(key) < 16):
+                hour_dic['14-16'] += val
+            elif (int(key) > 16 and int(key) < 18):
+                hour_dic['16-18'] += val
+            elif (int(key) > 18 and int(key) < 20):
+                hour_dic['18-20'] += val
+            elif (int(key) > 20 and int(key) < 22):
+                hour_dic['20-22'] += val
+            elif (int(key) > 22):
+                hour_dic['22-00'] += val
         hour_list = []
         for key, val in hour_dic.items():
             tmp_dic = {}
@@ -204,6 +227,9 @@ def get_time_for_all_states(time_range):
     ans = get_state_time(time_range)
     return ans
 
+def get_county_frequency():
+    tmp_df = current_df["County"].value_counts().rename_axis('county').reset_index(name='value')
+    return tmp_df.to_json(orient="records")
 
 def get_county_bar(state):
     data = current_df.loc[:, ['State', 'County']].values
@@ -229,9 +255,12 @@ def get_county_bar(state):
     # print(bar_list)
     return bar_list
 
+def get_state_frequency():
+    tmp_df = current_df["State"].value_counts().rename_axis('state').reset_index(name='value')
+    tmp_df['state'] = tmp_df['state'].map(us_state_abbrev)
+    return tmp_df.to_json(orient="records")
 
 def get_bar_data():
-    print(current_df)
     states = current_df['State'].tolist()
     list_set = set(states)
     unique_list = (list(list_set))
@@ -255,7 +284,6 @@ def get_bar_data():
         i += 1
     return bar_list
 
-
 def get_time_series_data():
     tmp_df = current_df.loc[:, ["Start_Time", "ID"]]
     tmp_df['Start_Time'] = pd.to_datetime(tmp_df['Start_Time'], errors='coerce')
@@ -264,17 +292,6 @@ def get_time_series_data():
     # df.columns = column_names
     # return(tmp_df.groupby([tmp_df['Start_Time'].dt.year, tmp_df['Start_Time'].dt.month]).agg({'count'}))
     return tmp_df.resample('M', on="Start_Time").agg({'count'})
-
-
-def get_state_frequency():
-    tmp_df = current_df["State"].value_counts().rename_axis('state').reset_index(name='value')
-    tmp_df['state'] = tmp_df['state'].map(us_state_abbrev)
-    return tmp_df.to_json(orient="records")
-
-
-def get_county_frequency():
-    tmp_df = current_df["County"].value_counts().rename_axis('county').reset_index(name='value')
-    return tmp_df.to_json(orient="records")
 
 
 def update_current_df(state, start_time=None, end_time=None):
