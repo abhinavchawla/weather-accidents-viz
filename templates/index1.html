@@ -313,15 +313,15 @@
         <div class="card" style="flex-direction: column;">
             <h3>Accident Distribution</h3>
             <div style="display: flex; justify-content: space-evenly;flex-direction: row;">
-            <svg id="mysvg5" width="320" height="300"></svg>
-            <svg id="mysvg4" width="320" height="300"></svg>
+            <svg id="mysvg5" width="450" height="300"></svg>
+            <svg id="mysvg4" width="350" height="300"></svg>
                 </div>
         </div>
         <div class="card" style="flex-direction: column;">
                         <h3>Accident Distribution</h3>
             <div style="display: flex; justify-content: space-evenly;flex-direction: row;">
-            <svg id="mysvg3" width="370" height="300"></svg>
-            <svg id="mysvg2" width="320" height="300"></svg>
+            <svg id="mysvg3" width="400" height="300"></svg>
+            <svg id="mysvg2" width="350" height="300"></svg>
                 </div>
 
         </div>
@@ -2227,12 +2227,17 @@ const createDayChartBar = (id, dayData, Name) => {
                             return d.state === f.properties.name
                         }) || f.properties
                     })
-
                     counties.forEach(function (f) {
+                        console.log(f.id.substring(0,2))
+                        var state1 = states.find(function (d) {
+                            return d.id === f.id.substring(0,2)
+                        })
+                        console.log(state1)
                         f.properties = data2.find(function (d) {
-                            return d.county === f.properties.name
+                            return d.county === f.properties.name && d.state === state1.properties.state
                         }) || f.properties
                     })
+                    console.log(data2)
 
                     statePaths = svg.selectAll('.state')
                         .data(states)

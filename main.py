@@ -90,6 +90,7 @@ us_state_abbrev = {
     'CA': 'California',
     'CO': 'Colorado',
     'CT': 'Connecticut',
+    'DC': 'District of Columbia',
     'DE': 'Delaware',
     'FL': 'Florida',
     'GA': 'Georgia',
@@ -146,7 +147,6 @@ def get_state_time(time_range, state=''):
                  'September': 0, 'October': 0, 'November': 0, 'December': 0}
     day_dic = {'Monday': 0, 'Tuesday': 0, 'Wednesday': 0, 'Thursday': 0, 'Friday': 0, 'Saturday': 0, 'Sunday': 0}
     hour_dic = {'00-02': 0, '02-04': 0, '04-06': 0, '06-08': 0, '08-10': 0, '10-12': 0, '12-14': 0, '14-16': 0, '16-18': 0, '18-20': 0, '20-22': 0, '22-00': 0}
-    print(current_df)
 
     if (time_range == 'year'):
         tmp_data = current_df.groupby(current_df['End_Time'].dt.strftime('%Y')).count()
@@ -230,8 +230,24 @@ def get_time_for_all_states(time_range):
     return ans
 
 def get_county_frequency():
-    tmp_df = current_df["County"].value_counts().rename_axis('county').reset_index(name='value')
-    return tmp_df.to_json(orient="records")
+    data = current_df.loc[:, ['State', 'County']].values
+    county_dic = {}
+    for val in data:
+        if val[1]+'*'+val[0] in county_dic:
+            county_dic[val[1]+'*'+val[0]]+=1
+        else:
+            county_dic[val[1] + '*' + val[0]]=0
+    bar_list = []
+    i = 0
+    for key, val in county_dic.items():
+        tmp_dic = {}
+        tmp_dic["state"] = us_state_abbrev[key.split('*')[1]]
+        tmp_dic["county"] = key.split('*')[0]
+        tmp_dic["value"] = val
+        bar_list.append(tmp_dic)
+        i += 1
+    # print(bar_list)
+    return json.dumps(bar_list)
 
 def get_county_bar(state):
     data = current_df.loc[:, ['State', 'County']].values
@@ -243,7 +259,9 @@ def get_county_bar(state):
             county_dic[val[1]] = 0
     for item in count_list:
         county_dic[item] += 1
+
     sorted_bar_dic = dict(sorted(county_dic.items(), key=lambda item: item[1], reverse=True))
+    print(sorted_bar_dic)
     bar_list = []
     i = 0
     for key, val in sorted_bar_dic.items():
