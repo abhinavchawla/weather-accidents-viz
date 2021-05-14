@@ -326,7 +326,7 @@ def update_current_df(state, start_time=None, end_time=None):
 
 def get_pcp_data():
     attributes = ['Severity', 'Temperature(F)', 'Humidity(%)', 'Visibility(mi)', 'Weather_Condition', 'Wind_Speed(mph)']
-    df_tmp = current_df.sample(500)
+    df_tmp = current_df.sample(3000)
     df_pcp = df_tmp[attributes]
     data = df_pcp.values
     pcp_list = []
